@@ -1,5 +1,9 @@
-const { spawn } = require('child_process');
-const path = require('path');
+import { spawn } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const serverPath = path.join(__dirname, 'build/index.js');
 const serverProcess = spawn('node', [serverPath], {
@@ -18,6 +22,11 @@ serverProcess.stdout.on('data', (data) => {
     for (const line of lines) {
         if (!line.trim()) continue;
         try {
+            // Skip non-JSON lines (like server startup logs)
+            if (!line.startsWith('{')) {
+                console.log('Server Log:', line);
+                continue;
+            }
             const message = JSON.parse(line);
             console.log('Received:', message);
 
